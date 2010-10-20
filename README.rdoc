@@ -1,0 +1,25 @@
+= Traffic Predictor
+
+A Ruby application which tries to answer the question of "What will the traffic be like on road r during time t?"
+
+I plan on adding more documentation later, but this is the slim skinny to get you started.
+
+== Usage
+
+It's pretty simple really:
+
+ * bin/traffic.rb scrapes the WSDOT feed gathering highway metrics.
+ * bin/predict_times.rb preloads the information from the logs gathered by the traffic.rb script
+ * bin/report_times.rb displays route segment information.
+
+== Development
+
+Since this is purley academic, I encourage people to throw down on this and have as much fun with it as you can.
+
+== Problems or Questions?
+
+Email me: bryan.kroger@gmail.com
+
+== Copyright
+
+See LICENSE for details.
