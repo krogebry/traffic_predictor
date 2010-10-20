@@ -28,4 +28,4 @@ Email me: bryan.kroger@gmail.com
 
 == Copyright
 
-KSONSoftware 2010.
+See LICENSE.
