@@ -1,0 +1,47 @@
+<!-- Utility -->
+<script language="javascript" type='text/javascript' src='/js/strftime-min.js'></script>
+
+<script type="text/javascript">
+Ext.onReady(function(){
+	Ext.QuickTips.init();
+	Ext.form.Field.prototype.msgTarget = 'side';
+
+	//tplPredictor = Ext.XTemplate( "<div>Hour <inpu</div>" );
+
+	var predictorPanel = new Ext.Panel({
+		layout: 'border',
+		title: 'Predictor',
+		items: [new Ext.FormPanel({
+			//layout: 'fit',
+			//height: 800,
+			region: 'center',
+			labelAlign: 'left',
+			defaultType: 'textfield',
+			columnWidth: 0.25,
+			items: [{
+				name: 'blah',
+				fieldLabel: 'blah'
+			}]
+		}),new Ext.Panel({
+			html: 'Data',
+			//layout: 'fit',
+			height: 200,
+			region: 'south'
+		}) ]
+	});
+
+	var center = new Ext.TabPanel({
+		items: [predictorPanel],
+		activeItem: 0,
+		region: 'center'
+	});
+
+	new Ext.Viewport({
+		title: 'Traffic Simulator',
+		items: [ center ],
+		layout: 'border',
+		renderTo: Ext.getBody()
+	});
+
+});
+</script>

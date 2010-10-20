@@ -1,0 +1,5 @@
+/**
+ * main()
+ */
+$(document).ready(function(){
+});
