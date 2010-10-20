@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 ##
-# Run the prediction logic and store it on the relavant collection.
+# This was an experiment that was supposed to expand the data set backwards in time.
+# 	So far it hasn't worked out as well as I had hopped.
 ##
 require 'init.rb'
 

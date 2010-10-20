@@ -20,6 +20,12 @@ Since this is purley academic, I encourage people to throw down on this and have
 
 Email me: bryan.kroger@gmail.com
 
+== TODO
+
+ * Create some kind of web ui which will allow users to pick a road segment, and a time slice.
+ * Clean up the bin dir; move scripts around so they make more sense.
+ * Use more of an 'upsert' type data gathering mech.
+
 == Copyright
 
-See LICENSE for details.
+KSONSoftware 2010.

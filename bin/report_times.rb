@@ -1,12 +1,12 @@
 #!/usr/bin/ruby
 ##
-# Run the prediction logic and store it on the relavant collection.
+# Show the estimated traffic density prediction for a given set of segments at a designated time.
 ##
 require 'init.rb'
 
 begin
 	collSegments= DBConn.collection( "segment_states" )
-	collLog = DBConn.collection( "expanded_segment_log" )
+	#collLog = DBConn.collection( "expanded_segment_log" )
 
 	#segment = collSegments.find( {},{ :sort => [["tsCreated","ASC"]], :limit => 1 }).first()
 	#segment = collSegments.find({ :title => "216th St SE", :milepost => 27.44 }).first()
@@ -32,12 +32,13 @@ begin
 	#})
 
 	segments = collSegments.find({ 
-		:location => 18, 
+		:location => 167, 
 		:direction => "NB"
 		#:milepost => { "$gte" => 4.12, "$lte" => 13.6 }
 	},{
 		:sort => [["milepost","ASC"]]
 	})
+	#Log.debug( "Segments" ){ segments.count }
 
 	rangeStart = [17,0]
 	rangeEnd = [18,0]

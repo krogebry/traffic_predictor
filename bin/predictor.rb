@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 ##
-# Predict things.
-# Pull out the patterns in the change of the segment states.
+# This was the beginning script to help me figure out how things were going to look.
+#	It's mostly depricated at this point.
 ##
 require 'init.rb'
 
