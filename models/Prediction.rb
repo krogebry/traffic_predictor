@@ -42,6 +42,7 @@ class Prediction
 	##
 	def getColor( readings )
 		total = 0
+		return "#000000" if(readings == nil)
 		readings.map(){|r| total+=r }
 		return "#000000" if(total == 0)
 		#Log.debug( "Total" ){ total }
@@ -98,12 +99,12 @@ class Prediction
 
 				color = self.getColor( readings )
 
-
 				ro.push({
-					:start => segment["loc"],
 					:name => segment["title"],
+					:color => color,
+					:start => segment["loc"],
 					:end => segNext["loc"],
-					:color => color
+					:readings => readings
 				})
 			end
 			i+=1

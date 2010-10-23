@@ -20,7 +20,7 @@ class App < Sinatra::Base
 		p.highway = highway
 		p.direction = direction
 		p.todHour = todHour
-		p.todMinute = todMinute
+		p.todMinute = (todMinute / 5)
 		Log.debug( "p" ){ p.inspect }
 
 		data = p.getPredictions()

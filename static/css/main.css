@@ -3,7 +3,10 @@ html { height: 100% }
 body { height: 100%; margin: 0px; padding: 0px }
 
 #options{ 
-	height: 5%; 
+	border: 1px solid #000000;
+	height: 50px;
+	text-align: center;
+	padding-top: 5px;
 	background-color: #efefef;
 }
 #map_canvas { height: 95% }

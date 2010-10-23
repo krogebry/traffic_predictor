@@ -1,89 +1,56 @@
-
 <script type="text/javascript">
 var map;
-
 $(document).ready(function(){
-
-	//var myLatLng = new google.maps.LatLng(47, -122);
-	var myLatLng = new google.maps.LatLng(47.443995164,-122.216693434);
-
-	var myOptions = {
-		zoom: 12,
-		center: myLatLng,
-		//mapTypeId: google.maps.MapTypeId.TERRAIN
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
-
-	map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
-	//console.log( map );
-
-	$("#btnUpdate").click(function(){
-		updateMap();
+	$("#hour_slider").slider({
+		min: 0,
+		max: 24,
+		step: 1,
+		value: 17,
+		slide: function(event, ui) {
+			updateToD();
+		}
 	});
 
-	/**
-	var flightPlanCoordinates = [
-		new google.maps.LatLng(37.772323, -122.214897),
-		new google.maps.LatLng(21.291982, -157.821856),
-		new google.maps.LatLng(-18.142599, 178.431),
-		new google.maps.LatLng(-27.46758, 153.027892)
-	];
-	*/
-
-	/**
-	var flightPlanCoordinates = [];
-	<% segCoords.each do |cGroup| %>
-		var pLine = new google.maps.Polyline({
-			path: [
-				new google.maps.LatLng( <%= cGroup[:start][0] %>,<%= cGroup[:start][1] %> ),
-				new google.maps.LatLng( <%= cGroup[:end][0] %>,<%= cGroup[:end][1] %> )
-			],
-			//geodesic: true,
-			strokeColor: "<%= cGroup[:color] %>",
-			storkeOpacity: 1.0,
-			strokeWeight: 4
-		});
-		pLine.setMap( map );
-		var marker = new google.maps.Marker({
-			map: map,
-			position: new google.maps.LatLng( <%= cGroup[:start][0] %>,<%= cGroup[:start][1] %> ),
-			title: "<%= cGroup[:start][0] %>,<%= cGroup[:start][1] %>x<%= cGroup[:end][0] %>,<%= cGroup[:end][1] %>" 
-		});
-
-	<% end %>
-	*/
-
-	/**
-	var pLine = new google.maps.Polyline({
-		path: [
-			new google.maps.LatLng( 47.443995164,-122.216693434 ),
-			new google.maps.LatLng( 47.410096552,-122.220336518 )
-		],
-		geodesic: true,
-		strokeColor: "#ff0000",
-		storkeOpacity: 0.5,
-		strokeWeight: 2
+	$("#minute_slider").slider({
+		min: 1,
+		max: 60,
+		step: 5,
+		value: 30,
+		slide: function(event, ui) {
+			updateToD();
+		}
 	});
-	pLine.setMap( map );
-	*/
 
-	/**
-	var flightPath = new google.maps.Polyline({
-		path: flightPlanCoordinates,
-		geodesic: true,
-		strokeColor: "#FF0000",
-		strokeOpacity: 1.0,
-		strokeWeight: 2
-	});
-	flightPath.setMap(map);
-	*/
+	$("#btnUpdate").click(function(){ updateMap(); });
 
+	updateToD();
+	updateMap();
 });
 
+function updateToD(){
+	var meridian = "AM";
+
+	var hour = $("#hour_slider").slider("value");
+	var minute = $("#minute_slider").slider("value");
+
+	if(hour <= 9){
+		hour = "0"+hour;
+	}
+	if(hour > 12){
+		hour -= 12;
+		meridian = "PM";
+	}
+
+	if(minute <= 9){
+		minute = "0"+minute;
+	}
+
+	$("#tod").html( hour+":"+minute+" "+meridian );
+}
+
 function updateMap(){
-	var day = $("select[name=day]").val();
-	var todHour = $("select[name=tod_hour]").val();
-	var todMinute = $("select[name=tod_minute]").val();
+	var hour = $("#hour_slider").slider("value");
+	var minute = $("#minute_slider").slider("value");
 	var highway = $("select[name=highway]").val();
 
 	//console.log( day );
@@ -92,10 +59,19 @@ function updateMap(){
 
 	$.ajax({
 		url: '/predict',
-		data: { todHour: todHour, todMinute: todMinute, highway: highway },
+		data: { todHour: hour, todMinute: minute, highway: highway },
 		type: 'POST',
 		dataType: 'json',
 		success: function( res ){
+
+			var myLatLng = new google.maps.LatLng( res.data[0].start[0],res.data[0].start[1] );
+			var myOptions = {
+				zoom: 12,
+				center: myLatLng,
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			};
+			map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
 			//console.log( res );
 			res.data.forEach(function( r ){
 				var pLine = new google.maps.Polyline({
@@ -104,49 +80,51 @@ function updateMap(){
 						new google.maps.LatLng( r.end[0],r.end[1] )
 					],
 					strokeColor: r.color,
-					storkeOpacity: 1.0,
-					strokeWeight: 4
+					strokeWeight: 4,
+					storkeOpacity: 1.0
 				});
 				pLine.setMap( map );
-				/**
+
 				var marker = new google.maps.Marker({
 					map: map,
-					position: new google.maps.LatLng( r.start[0],r.start[1] ),
-					title: r.name
+					title: r.name +" :: "+ r.readings,
+					position: new google.maps.LatLng( r.start[0],r.start[1] )
 				});
-				*/
 			});
 		}
 	});
-
-
 }
 </script>
 
 <div id="options">
-	<select name="highway"><% RoadSystems.each do |highway| %>
-		<option value="<%= highway %>"><%= highway %></option>
-	<% end %></select>
+	<table cellspacing="0" cellpadding="0" style="width: 100%;">
+	<tr>
+		<td style="width: 25%;">
+			<label for="highway">Highway</label>
+			<select name="highway"><% RoadSystems.each do |highway| %>
+				<option <%= (highway == 5 ? "selected" : "" ) %> value="<%= highway %>"><%= highway %></option>
+			<% end %></select>
+		</td>
 
-	<select name="day">
-		<option value="monday">Monday</option>
-		<option value="tuesday">Tuesday</option>
-		<option value="wednesday">Wednesday</option>
-		<option value="thursday">Thursday</option>
-		<option value="friday">Friday</option>
-		<option value="saturday">Saturday</option>
-		<option value="sunday">Sunday</option>
-	</select>
+		<td style="width: 50%;"><table cellspacing="0" cellpadding="0" style="width: 100%;height: 50px;">
+		<tr>
+			<td>Hour:</td>
+			<td style="width: 25%;"><div id="hour_slider"></div></td>
 
-	<select name="tod_hour"><% (1..23).each do |i| %>
-		<option value="<%= i %>"><%= i %></option>
-	<% end %></select>
+		</tr><tr>
+			<td>Minute:</td>
+			<td style="width: 75%;"><div id="minute_slider"></div></td>
 
-	<select name="tod_minute"><% (1..12).each do |i| %>
-		<option value="<%= i %>"><%= (i*5) %></option>
-	<% end %></select>
+		</tr>
+		</table></td>
 
-	<button id="btnUpdate">Update</button>
+		<td style="width: 25%;">
+			<div id="tod"></div>
+			<button id="btnUpdate">Get Prediction</button>
+		</td>
+	</tr>
+	</table>
+
 </div>
 
 <div id="map_canvas"></div> 
