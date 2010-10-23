@@ -33,28 +33,28 @@ begin
 
 	segments = collSegments.find({ 
 		:location => 167, 
-		:direction => "NB"
+		:direction => "SB"
 		#:milepost => { "$gte" => 4.12, "$lte" => 13.6 }
 	},{
-		:sort => [["milepost","ASC"]]
+		:sort => [["milepost","DESC"]]
 	})
 	#Log.debug( "Segments" ){ segments.count }
 
-	rangeStart = [17,0]
-	rangeEnd = [18,0]
+	rangeStart = [14,0]
+	rangeEnd = [14,5]
 
 	numIterations = ((rangeEnd[0]-rangeStart[0])*12) + (rangeEnd[1]-rangeStart[1])
 	Log.debug( "Num Iteration" ){ numIterations }
 
 	segments.each do |segment|
-		Log.debug( "Segment" ){ "%s %s" % [segment["title"],segment["milepost"]] }
+		Log.info( "Segment" ){ "%s %s" % [segment["title"],segment["milepost"]] }
 		currRange = [rangeStart[0],rangeStart[1]]
 
 		numIterations.times do |i|
 			#Log.debug( "Range" ){ currRange.inspect }
 
 			chunk = segment["readings"][currRange[0]][currRange[1]]
-			Log.warn( "Chunk" ){ chunk.inspect }
+			#Log.warn( "Chunk" ){ chunk.inspect }
 			totals = {}
 			total = 0
 			(0..(chunk.length-1)).each do |i|
@@ -78,10 +78,20 @@ begin
 				#Log.debug( "Total" ){ "%.2f %i %.2f" % [weight,total,(weight-total)] }
 			#end
 
-			totals.each do |state,cnt|
-				pct = ((cnt.to_f() / total.to_f())*100)
-				Log.debug( state ){ "%i %i%%" % [cnt,pct] }
-			end
+			Log.warn( "Time segment" ){ "%i:%i" % [currRange[0],(currRange[1]*5)] }
+
+			totals = totals.sort{|a,b| a[1] <=> b[1] }
+
+			#totals.each do |state,cnt|
+				#pct = ((cnt.to_f() / total.to_f())*100)
+				#Log.debug( state ){ "%i %i%%" % [cnt,pct] }
+			#end
+
+			state = totals[(totals.length-1)][0]
+			cnt = totals[(totals.length-1)][1]
+
+			pct = ((cnt.to_f() / total.to_f())*100)
+			Log.debug( state ){ "%i %i%%" % [cnt,pct] }
 
 			if(currRange[1]+1 == 11)
 				currRange[0] += 1

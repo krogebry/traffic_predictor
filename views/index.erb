@@ -1,47 +1,154 @@
-<!-- Utility -->
-<script language="javascript" type='text/javascript' src='/js/strftime-min.js'></script>
 
 <script type="text/javascript">
-Ext.onReady(function(){
-	Ext.QuickTips.init();
-	Ext.form.Field.prototype.msgTarget = 'side';
+var map;
 
-	//tplPredictor = Ext.XTemplate( "<div>Hour <inpu</div>" );
+$(document).ready(function(){
 
-	var predictorPanel = new Ext.Panel({
-		layout: 'border',
-		title: 'Predictor',
-		items: [new Ext.FormPanel({
-			//layout: 'fit',
-			//height: 800,
-			region: 'center',
-			labelAlign: 'left',
-			defaultType: 'textfield',
-			columnWidth: 0.25,
-			items: [{
-				name: 'blah',
-				fieldLabel: 'blah'
-			}]
-		}),new Ext.Panel({
-			html: 'Data',
-			//layout: 'fit',
-			height: 200,
-			region: 'south'
-		}) ]
+	//var myLatLng = new google.maps.LatLng(47, -122);
+	var myLatLng = new google.maps.LatLng(47.443995164,-122.216693434);
+
+	var myOptions = {
+		zoom: 12,
+		center: myLatLng,
+		//mapTypeId: google.maps.MapTypeId.TERRAIN
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+
+	map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+	//console.log( map );
+
+	$("#btnUpdate").click(function(){
+		updateMap();
 	});
 
-	var center = new Ext.TabPanel({
-		items: [predictorPanel],
-		activeItem: 0,
-		region: 'center'
-	});
+	/**
+	var flightPlanCoordinates = [
+		new google.maps.LatLng(37.772323, -122.214897),
+		new google.maps.LatLng(21.291982, -157.821856),
+		new google.maps.LatLng(-18.142599, 178.431),
+		new google.maps.LatLng(-27.46758, 153.027892)
+	];
+	*/
 
-	new Ext.Viewport({
-		title: 'Traffic Simulator',
-		items: [ center ],
-		layout: 'border',
-		renderTo: Ext.getBody()
+	/**
+	var flightPlanCoordinates = [];
+	<% segCoords.each do |cGroup| %>
+		var pLine = new google.maps.Polyline({
+			path: [
+				new google.maps.LatLng( <%= cGroup[:start][0] %>,<%= cGroup[:start][1] %> ),
+				new google.maps.LatLng( <%= cGroup[:end][0] %>,<%= cGroup[:end][1] %> )
+			],
+			//geodesic: true,
+			strokeColor: "<%= cGroup[:color] %>",
+			storkeOpacity: 1.0,
+			strokeWeight: 4
+		});
+		pLine.setMap( map );
+		var marker = new google.maps.Marker({
+			map: map,
+			position: new google.maps.LatLng( <%= cGroup[:start][0] %>,<%= cGroup[:start][1] %> ),
+			title: "<%= cGroup[:start][0] %>,<%= cGroup[:start][1] %>x<%= cGroup[:end][0] %>,<%= cGroup[:end][1] %>" 
+		});
+
+	<% end %>
+	*/
+
+	/**
+	var pLine = new google.maps.Polyline({
+		path: [
+			new google.maps.LatLng( 47.443995164,-122.216693434 ),
+			new google.maps.LatLng( 47.410096552,-122.220336518 )
+		],
+		geodesic: true,
+		strokeColor: "#ff0000",
+		storkeOpacity: 0.5,
+		strokeWeight: 2
 	});
+	pLine.setMap( map );
+	*/
+
+	/**
+	var flightPath = new google.maps.Polyline({
+		path: flightPlanCoordinates,
+		geodesic: true,
+		strokeColor: "#FF0000",
+		strokeOpacity: 1.0,
+		strokeWeight: 2
+	});
+	flightPath.setMap(map);
+	*/
 
 });
+
+function updateMap(){
+	var day = $("select[name=day]").val();
+	var todHour = $("select[name=tod_hour]").val();
+	var todMinute = $("select[name=tod_minute]").val();
+	var highway = $("select[name=highway]").val();
+
+	//console.log( day );
+	//console.log( todHour );
+	//console.log( todMinute );
+
+	$.ajax({
+		url: '/predict',
+		data: { todHour: todHour, todMinute: todMinute, highway: highway },
+		type: 'POST',
+		dataType: 'json',
+		success: function( res ){
+			//console.log( res );
+			res.data.forEach(function( r ){
+				var pLine = new google.maps.Polyline({
+					path: [
+						new google.maps.LatLng( r.start[0],r.start[1] ),
+						new google.maps.LatLng( r.end[0],r.end[1] )
+					],
+					strokeColor: r.color,
+					storkeOpacity: 1.0,
+					strokeWeight: 4
+				});
+				pLine.setMap( map );
+				/**
+				var marker = new google.maps.Marker({
+					map: map,
+					position: new google.maps.LatLng( r.start[0],r.start[1] ),
+					title: r.name
+				});
+				*/
+			});
+		}
+	});
+
+
+}
 </script>
+
+<div id="options">
+	<select name="highway"><% RoadSystems.each do |highway| %>
+		<option value="<%= highway %>"><%= highway %></option>
+	<% end %></select>
+
+	<select name="day">
+		<option value="monday">Monday</option>
+		<option value="tuesday">Tuesday</option>
+		<option value="wednesday">Wednesday</option>
+		<option value="thursday">Thursday</option>
+		<option value="friday">Friday</option>
+		<option value="saturday">Saturday</option>
+		<option value="sunday">Sunday</option>
+	</select>
+
+	<select name="tod_hour"><% (1..23).each do |i| %>
+		<option value="<%= i %>"><%= i %></option>
+	<% end %></select>
+
+	<select name="tod_minute"><% (1..12).each do |i| %>
+		<option value="<%= i %>"><%= (i*5) %></option>
+	<% end %></select>
+
+	<button id="btnUpdate">Update</button>
+</div>
+
+<div id="map_canvas"></div> 
+
+

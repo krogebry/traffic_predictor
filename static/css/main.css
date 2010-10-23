@@ -1,1 +1,10 @@
 
+html { height: 100% }
+body { height: 100%; margin: 0px; padding: 0px }
+
+#options{ 
+	height: 5%; 
+	background-color: #efefef;
+}
+#map_canvas { height: 95% }
+

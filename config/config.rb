@@ -1,7 +1,7 @@
 ##
 # Configuration file for main application
 ##
-ApplicationName	= "traf_sim"
+ApplicationName	= "Traffic Predictor"
 
 ## Database settings
 DBName  	= "traf_sim"

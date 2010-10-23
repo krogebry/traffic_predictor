@@ -16,6 +16,9 @@ It's pretty simple really:
 
 Since this is purley academic, I encourage people to throw down on this and have as much fun with it as you can.
 
+My outline for this project as a google document:
+https://docs.google.com/document/pub?id=1pvm_sGHX-ztSKWUPg-pnDbCs5fjUE4ATzX4SNNC4sQY
+
 == Problems or Questions?
 
 Email me: bryan.kroger@gmail.com

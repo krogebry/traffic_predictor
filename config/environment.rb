@@ -21,11 +21,6 @@ begin
 	Log = Logger.new(STDOUT)
 	Log.formatter	= Logger::Formatter.new()
 	Log.level = Logger::DEBUG
-	#Log.fatal("Fatal")
-	#Log.error("Error")
-	#Log.warn("Warning")
-	#Log.info("Info")
-	#Log.debug("Debug")
 
 	ENV['RACK_ENV'] ||= 'development'
 
@@ -41,7 +36,7 @@ begin
 		Dir.glob(File.join(path, '*.rb')).sort.each { |f| require f }
 	end
 
-	MCache		= MemCache.new( MCServers )
+	#MCache = MemCache.new( MCServers )
 
 rescue => e
 	puts "Exception caught while trying to pre-cache elements: #{$!}"
