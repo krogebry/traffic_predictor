@@ -29,6 +29,10 @@ Email me: bryan.kroger@gmail.com
  * Clean up the bin dir; move scripts around so they make more sense.
  * Use more of an 'upsert' type data gathering mech.
 
+== Demo
+
+http://trafficpredictor.ksonsoftware.com/
+
 == Copyright
 
 See LICENSE.
