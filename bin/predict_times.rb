@@ -62,12 +62,35 @@ begin
 	CollLog = DBConn.collection( "segment_log" )
 	#CollLog = DBConn.collection( "expanded_segment_log" )
 
-	segments = CollSegments.find() 
+	Threads = []
+	MaxNumThreads = 10
+
+	#segments = CollSegments.find()
+	segments = CollSegments.find().sort( [[:lastUpdatedAt,-1]] ).limit( 100 )
+
 	segments.each do |segment|
 		begin
-			#Log.debug( "Segment" ){ segment.inspect }
-			#Log.debug( "Segment (%s)" % bId ){ "%s %s" % [segment["title"],segment["milepost"]] }
-			runSegment( segment )
+			while( Threads.length >= MaxNumThreads)
+				Log.debug( "Sleeping" ){ Threads.length }
+				#Log.warn( "Threads" ){ Threads.inspect }
+				sleep 1
+			end
+
+			threadId = Threads.count
+			Threads << Thread.new do 
+				tId = threadId
+				#Log.debug( "starting thread "){ threadId }
+				runSegment( segment )
+				Log.debug( "Done with segment" )
+
+				#tSeg = segment
+				#Log.debug( "Segment" ){ segment.inspect }
+				#Log.debug( "Segment (%s)" % bId ){ "%s %s" % [segment["title"],segment["milepost"]] }
+				#sleep rand( 5 )
+				Threads.delete_at(threadId)
+				Log.warn( "Removing thread "){ "%i %i" % [Threads.length,threadId] }
+				#Threads[tId] = nil
+			end
 
 		rescue => e
 			puts "Caught exception in thread: #{$!}"
@@ -75,6 +98,8 @@ begin
 
 		end
 	end 
+
+	Threads.each do |t| t.join if(t!=nil) end
 
 rescue => e
 	puts "Caught exception: #{$!}"
