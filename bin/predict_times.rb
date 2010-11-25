@@ -5,17 +5,19 @@
 require 'init.rb'
 
 def runSegment( segment )
-	Log.debug( "Segment" ){ "%s %s %s" % [segment["title"],segment["milepost"],segment["_id"]] }
+	Log.debug( "Segment" ){ "%s %s %s" % [segment["guid"],segment["milepost"],segment["_id"]] }
 
 	logs = CollLog.find({
-		:segmentId => segment["_id"], 
+		:reading => { "$ne" => nil },
 		:tsUpdated => { "$ne" => nil },
-		:reading => { "$ne" => nil }
+		:segmentGUID => segment["guid"]
 	},{
 		:sort => [["tsUpdated","ASC"]] 
 	})
 
 	readings = {}
+
+	#Log.debug( "Num logs" ){ logs.count() }
 
 	logs.each do |log|
 		#Log.warn( "Log" ){ log["reading"] }
@@ -70,27 +72,27 @@ begin
 
 	segments.each do |segment|
 		begin
-			while( Threads.length >= MaxNumThreads)
-				Log.debug( "Sleeping" ){ Threads.length }
-				#Log.warn( "Threads" ){ Threads.inspect }
-				sleep 1
-			end
+			#while( Threads.length >= MaxNumThreads)
+				#Log.debug( "Sleeping" ){ Threads.length }
+				##Log.warn( "Threads" ){ Threads.inspect }
+				#sleep 1
+			#end
 
-			threadId = Threads.count
-			Threads << Thread.new do 
-				tId = threadId
+			#threadId = Threads.count
+			#Threads << Thread.new do 
+				#tId = threadId
 				#Log.debug( "starting thread "){ threadId }
 				runSegment( segment )
-				Log.debug( "Done with segment" )
+				#Log.debug( "Done with segment" )
 
 				#tSeg = segment
 				#Log.debug( "Segment" ){ segment.inspect }
 				#Log.debug( "Segment (%s)" % bId ){ "%s %s" % [segment["title"],segment["milepost"]] }
 				#sleep rand( 5 )
-				Threads.delete_at(threadId)
-				Log.warn( "Removing thread "){ "%i %i" % [Threads.length,threadId] }
+				#Threads.delete_at(threadId)
+				#Log.warn( "Removing thread "){ "%i %i" % [Threads.length,threadId] }
 				#Threads[tId] = nil
-			end
+			#end
 
 		rescue => e
 			puts "Caught exception in thread: #{$!}"

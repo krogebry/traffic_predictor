@@ -31,89 +31,64 @@ begin
 		#Log.debug( "Num RSS Items" ){ rss.items.length }
 
 		rss.items.each do |item|
-			#Log.debug( "Item" ){ item.inspect }
-			#Log.warn( "Item title" ){ item.title }
+			#Log.debug( "GUID" ){ item.guid.content }
 
-			#Log.warn( "Item content" ){ item.description.inspect }
-			# <p>Located on 520         milepost 0.83</p><p>Direction: EB        </p><p>Latitude: 47.643831471, Longitude: -122.306443076</p><p>Reading: WideOpen</p><p>Time of reading: 10/10/2010 2:04:22 PM</p><div style=\"background-color: beige; border-top: solid 1px black; border-bottom: solid 1px black;\"><b>Last Updated At: 10/10/2010 2:04:22 PM</b>
+			#Log.debug( "Noko start" )
+			n = Nokogiri::HTML.parse( item.description )
+			#Log.debug( "Noko done" ){ n.inspect }
 
-			obj = {}
+			ps = n.xpath( "//p" )
+			#ps.each do |p|
+				#Log.debug( "PTag" ){ p.text }
+			#end
+			#Log.debug( "P tag" ){ ps[0].text }
 
-			# <p>Located on 520         milepost 0.83</p>
-			locScan = item.description.scan( /Located\son\s([0-9]{1,}).*milepost\s(.*)<\/p><p>Direction:/ )[0]
-			#Log.debug( "Located at" ){ locScan[0] }
-			#Log.debug( "Milepost" ){ locScan[1] }
-			obj[:location] = locScan[0].to_i()
-			obj[:milepost] = locScan[1].to_f()
+			obj = { :guid => item.guid.content.to_i() }
 
-			# <p>Direction: EB        </p>
-			direction = item.description.scan( /Direction:\s([A-Z]{1,})\s/ )[0]
-			#Log.debug( "Direction" ){ direction[0] }
-			obj[:direction] = direction[0]
+			(location,milepost) = ps[0].text.scan( /^Located\son\s([0-9]{1,}).*milepost\s(.*)$/ )[0]
+			#Log.warn( "Located:" ){ "%s at %s" % [location,milepost] }
+			#Log.warn( "Located:" ){ "%s at %s" % [scan[0][0],scan[0][1]] }
 
-			# <p>Latitude: 47.643831471, Longitude: -122.306443076</p>
-			latScan = item.description.scan( /Latitude:\s(.*),\sLongitude:\s(.*)<\/p><p>Reading/ )[0]
-			#Log.debug( "Lat, Long" ){ "%s -- %s" % [latScan[0],latScan[1]] }
-			obj[:loc] = [ latScan[0].to_f(), latScan[1].to_f() ]
+			obj[:location] = location.to_i()
+			obj[:milepost] = milepost.to_f()
 
-			# <p>Reading: WideOpen</p>
-			reading = item.description.scan( /Reading:\s(.*)<\/p><p>Time/ )[0]
-			#Log.warn( "Reading" ){ reading[0] }
-			obj[:reading] = reading[0]
+			obj[:direction] = ps[1].text.scan( /^Direction:\s([A-Z]{1,})\s.*$/ )[0][0]
+			#Log.warn( "Direction" ){ "[%s]" % obj[:direction] }
 
-			# <p>Time of reading: 10/10/2010 2:04:22 PM</p>
-			timeOfReading = item.description.scan( /Time\sof\sreading:\s(.*)<\/p><div/ )[0]
-			#Log.warn( "Time of reading" ){ timeOfReading[0] }
-			obj[:timeOfReading] = timeOfReading[0]
+			(lat,long) = ps[2].text.scan( /^Latitude:\s(.*),\sLongitude:\s(.*)$/ )[0]
+			obj[:loc] = [lat.to_f(),long.to_f()]
+			#Log.debug( "Three" ){ ps[2].text }
+			#Log.warn( "Loc" ){ "%.12f x %.12f" % obj[:loc] }
 
-			# <b>Last Updated At: 10/10/2010 2:04:22 PM</b>
-			lastUpdatedAt = item.description.scan( /Last\sUpdated\sAt:\s(.*)<\/b>/ )[0]
-			#Log.warn( "Last updated at" ){ lastUpdatedAt[0] }
-			obj[:lastUpdatedAt] = lastUpdatedAt[0]
+			reading = ps[3].text.scan( /^Reading:\s(.*)$/ )[0][0]
+			#Log.debug( "Reading" ){ reading }
+	
+			timeOfReading = ps[4].text.scan( /^Time\sof\sreading:\s(.*)$/ )[0][0]
+			#Log.warn( "TimeOfReading" ){ timeOfReading }
 
-			obj[:title] = item.title
+			#Log.debug( "Three" ){ ps[5].text }
 
-			search = collState.find({ :title => obj[:title] })
-			segmentId = nil
+			## Search for this segment
+			search = collState.find({ :guid => obj[:guid] })
 
-			if(search.count() == 0)
-				#Log.debug( "Creating" ){ obj.inspect }
-				segmentId = collState.save( obj )
+			## Save the segment information
+			collState.save( obj ) if(search.count() == 0)
 
-			else
-				row = search.first()
-				#Log.warn( "Row" ){ row.inspect }
-
-				if(row["lastUpdatedAt"] != obj[:lastUpdatedAt])
-					#Log.debug( "Updating" ){ row["_id"] }
-					#Collection.remove({ :_id => row["_id"] })
-					#saved = Collection.save( obj )
-					collState.update({ :_id => row["_id"] }, row.merge(obj))
-					#Log.debug( "Updated" ){ saved.inspect }
-
-					collLog.save({
-						:updated => obj[:lastUpdatedAt],
-						:reading => obj[:reading],
-						:segmentId => row["_id"],
-						:tsUpdated => Time.parse( obj[:lastUpdatedAt] ).to_i()
-					})
-				end
-
-				#Log.debug( "Count" ){ search.count() }
-				#search.each do |row|
-					#Log.warn( "Row" ){ row.inspect }
-				#end
-
-				#segmentId = row["_id"]
-
-			end
-
+			## Create the log entry
+			logId = collLog.save({
+				:updated => timeOfReading,
+				:reading => reading,
+				:tsUpdated => Time.parse( timeOfReading ).to_f(),
+				:segmentGUID => obj[:guid]
+			})
+			#Log.debug( "LogId" ){ logId }
 
 		end
 
 		Log.warn( "Sleeping" )
 		sleep 300
 		Log.debug( "Awake" )
+
 	end
 
 rescue => e

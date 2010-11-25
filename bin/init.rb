@@ -8,8 +8,7 @@ require 'mongo'
 require 'mongo_mapper'
 include Mongo
 require 'memcache'
-require 'rexml/document'
-include REXML
+require 'nokogiri'
 
 require '../config/config.rb'
 

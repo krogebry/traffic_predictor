@@ -92,8 +92,7 @@ class Prediction
 			segNext = segments[i+1]
 			#Log.debug( "Next" ){ segments[i+1].inspect }
 
-			if(segNext != nil)
-
+			if(segNext != nil && segment["readings"] != nil)
 				readings = segment["readings"][@todHour][@todMinute]
 				#Log.debug( "Readings" ){ readings.inspect }
 
