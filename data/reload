@@ -2,7 +2,14 @@
 ##
 # Reload data
 ##
-MONGO_RESTORE="/usr/loca/mongo/current/bin/mongorestore"
-HOST="localhost:10000/traff_sim"
+MONGO="/usr/local/mongo/current/bin/mongo"
+MONGO_RESTORE="/usr/local/mongo/current/bin/mongorestore"
+HOST="localhost:10000"
 
-$(MONGO_RESTORE} -h ${HOST} ./traf_sim/
+${MONGO} ${HOST}/traf_sim traf_sim/clear_db.js
+
+#/usr/local/mongo/current/bin/mongorestore -h localhost:10000 --db traff_sim ./traf_sim
+${MONGO_RESTORE} -h ${HOST} --db traf_sim ./traf_sim/
+
+${MONGO} ${HOST}/traf_sim traf_sim/create_indexes.js
+
