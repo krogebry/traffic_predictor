@@ -5,9 +5,10 @@ ApplicationName	= "Traffic Predictor"
 
 ## Database settings
 DBName  	= "traf_sim"
-DBPort  	= 10021
-DBHostname	= "devel01"
-#DBHostname	= "localhost"
+#DBPort  	= 10021
+DBPort  	= 10000
+#DBHostname	= "devel01"
+DBHostname	= "localhost"
 
 RTMPHost	= "192.168.1.89"
 
@@ -21,7 +22,7 @@ FSVideosContainer	= "/usr/local/data/traf_sim/videos"
 
 FSDocRoot	= "/var/www/ksonsoftware.com/dev/traf_sim"
 
-MCServers   = ["devel01:11211"]
+MCServers   = ["localhost:11211"]
 
 SegmentStates = [ "NoData", "WideOpen", "Moderate", "Heavy", "StopAndGo" ]
 

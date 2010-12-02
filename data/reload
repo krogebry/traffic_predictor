@@ -1,0 +1,8 @@
+#!/bin/bash
+##
+# Reload data
+##
+MONGO_RESTORE="/usr/loca/mongo/current/bin/mongorestore"
+HOST="localhost:10000/traff_sim"
+
+$(MONGO_RESTORE} -h ${HOST} ./traf_sim/
